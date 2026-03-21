@@ -38,7 +38,7 @@ const Login = () => {
 
       mostraAlerta(`Bienvenido(a) ${usuario.nombre}`, "success");
       await setLogin({ usuario, token });
-      navigate("/app/vehiculos/listado");
+      navigate("/app/productos/inicio");
 
     } catch (error) {
       console.error("Error completo:", error);
@@ -60,12 +60,12 @@ const Login = () => {
   };
 
   return (
-    <div className="hold-transition login-page" style={{ 
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
-      height: "100vh", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "center" 
+    <div className="hold-transition login-page" style={{
+      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      height: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
     }}>
       <div className="login-box" style={{ width: "380px" }}>
         <div className="login-logo mb-4" style={{ display: "flex", justifyContent: "center" }}>
@@ -82,9 +82,9 @@ const Login = () => {
           />
         </div>
 
-        <div className="card shadow-lg" style={{ 
-          borderRadius: "20px", 
-          border: "none", 
+        <div className="card shadow-lg" style={{
+          borderRadius: "20px",
+          border: "none",
           backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(10px)"
         }}>

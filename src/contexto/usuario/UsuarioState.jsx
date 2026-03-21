@@ -44,31 +44,27 @@ const UsuarioState = (props) => {
 
     // --- Carga inicial de listas ---
     const Lista = async () => {
-        try {
-            const productos = await axios.get(ProductosListar);
-            setListaProductos(productos.data || []);
+        if (!token) return;
+        const config = { headers: { Authorization: `Bearer ${token}` } };
 
-            const categorias = await axios.get(CategoriaListar);
-            setListaCategorias(categorias.data || []);
+        const cargar = async (url, setter) => {
+            try {
+                const res = await axios.get(url, config);
+                setter(res.data || []);
+            } catch (error) {
+                console.error(`Error al cargar ${url}:`, error);
+                // NO resetea — deja el valor anterior intacto
+            }
+        };
 
-            const lotes = await axios.get(LotesListar);
-            setListaLotes(lotes.data || []);
-
-            const salida = await axios.get(SalidaListar);
-            setListaSalida(salida.data || []);
-
-            const sucursales = await axios.get(SucursalesListar);
-            setListaSucursales(sucursales.data || []);
-        } catch (error) {
-            console.error("Error al obtener datos:", error);
-            setListaProductos([]);
-            setListaCategorias([]);
-            setListaLotes([]);
-            setListaSalida([]);
-            setListaSucursales([]);
-        }
+        await Promise.all([
+            cargar(ProductosListar, setListaProductos),
+            cargar(CategoriaListar, setListaCategorias),
+            cargar(LotesListar, setListaLotes),
+            cargar(SalidaListar, setListaSalida),
+            cargar(SucursalesListar, setListaSucursales),
+        ]);
     };
-
     // --- Actualizar lista individual ---
     const ActualizarLista = async (url, setDatos) => {
         try {

@@ -1,11 +1,6 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-/**
- * Para el size
- * modal-sm
- * modal-lg
- * modal-xl
- */
+
 
 const ModalButtonLess = (props) => {
     const openModal = () => props.setModalIsOpen(true);
@@ -13,10 +8,7 @@ const ModalButtonLess = (props) => {
 
     let triggerElement = null;
 
-    // Modificación clave aquí:
-    // El botón se renderizará SÓLO si:
-    // 1. props.mostrarBoton no es explícitamente false (permite control externo)
-    // 2. Y props.nombreBoton tiene un valor (no es nulo/vacío), lo que significa que quieres que ModalButtonLess lo genere.
+
     if (props.mostrarBoton !== false && props.nombreBoton) {
         const handleTrigger = props.onTriggerClick || openModal;
         triggerElement = props.linkStyle ? (
@@ -29,7 +21,7 @@ const ModalButtonLess = (props) => {
                 }}
             >
                 {props.nombreBoton}
-                {props.iconBoton && <i className={props.iconBoton} style={{ marginLeft: "8px" }} />} {/* Agregué icono al enlace */}
+                {props.iconBoton && <i className={props.iconBoton} style={{ marginLeft: "8px" }} />}
             </a>
         ) : props.isListItem ? (
             <li
@@ -56,9 +48,9 @@ const ModalButtonLess = (props) => {
 
     return (
         <>
-            {triggerElement} {/* Se renderizará solo si se cumplen las condiciones */}
+            {triggerElement}
             <Modal
-                show={props.modalIsOpen} onHide={closeModal} size={props.size || 'lg'} className="modal fade" // Usar props.size
+                show={props.modalIsOpen} onHide={closeModal} size={props.size || 'lg'} className="modal fade"
             >
                 <div className="modal-content">
                     <div className="modal-header">

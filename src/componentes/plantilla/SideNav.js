@@ -6,7 +6,22 @@ import NavItems from "./NavItems";
 import RelojDigital from "./RelojDigital";
 
 const navItems = [
-
+  {
+    nombre: "Productos",
+    icono: "fas fa-box",
+    url: "/app/productos",
+    urls: [
+      { url: "/app/productos/inicio", nombre: "Inicio" }
+    ]
+  },
+  {
+    nombre: "Sucursales",
+    icono: "fas fa-store",
+    url: "/app/sucursales",
+    urls: [
+      { url: "/app/sucursales/inicio", nombre: "Inicio" }
+    ]
+  }
 ];
 
 const SideNav = () => {
