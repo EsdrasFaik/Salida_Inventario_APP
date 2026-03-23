@@ -47,7 +47,6 @@ const EliminarCategoria = ({ datos, token, setListaCategorias, ActualizarLista }
             ActualizarLista(CategoriaListar, setListaCategorias);
 
         } catch (error) {
-            console.error(error);
             const msjError = error.response?.data?.error || "Ocurrió un error desconocido al eliminar.";
             mostraAlertaError(msjError);
         } finally {

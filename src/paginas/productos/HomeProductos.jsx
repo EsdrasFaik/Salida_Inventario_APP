@@ -16,8 +16,6 @@ const HomeProductos = () => {
     const pageDatos = {
         titulo: {
             titulo: "Gestión de productos",
-            url: "/app/productos",
-            tituloUrl: "productos",
             nombreUrl: "inicio",
         },
     };

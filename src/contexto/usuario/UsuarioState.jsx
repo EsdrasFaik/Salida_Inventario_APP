@@ -6,28 +6,32 @@ import {
     CategoriaListar,
     LotesListar,
     SalidaListar,
-    SucursalesListar
+    SucursalesListar,
+    UsuariosListar,
 } from "../../configuracion/apiUrls";
 import { UsuarioContext } from "./UsuarioContext";
 
 const UsuarioState = (props) => {
-    // --- Sesión ---
     const [usuario, setUsuario] = useSessionStorage("usuario_almacenado", null);
     const [token, setToken] = useSessionStorage("toke_almacenado", null);
+    const [hidratado, setHidratado] = useState(false);
 
-    // --- Listas ---
     const [listaProductos, setListaProductos] = useState([]);
     const [listaCategorias, setListaCategorias] = useState([]);
     const [listaLotes, setListaLotes] = useState([]);
     const [listaSalida, setListaSalida] = useState([]);
     const [listaSucursales, setListaSucursales] = useState([]);
+    const [listaUsuarios, setListaUsuarios] = useState([]);
     const [actualizar, setActualizar] = useState(false);
 
     useEffect(() => {
-        Lista();
+        setHidratado(true);
     }, []);
 
-    // --- Autenticación ---
+    useEffect(() => {
+        if (hidratado && token) Lista();
+    }, [hidratado, token]);
+
     const setCerrarSesion = () => {
         setUsuario(null);
         setToken(null);
@@ -42,7 +46,6 @@ const UsuarioState = (props) => {
         }
     };
 
-    // --- Carga inicial de listas ---
     const Lista = async () => {
         if (!token) return;
         const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -53,7 +56,6 @@ const UsuarioState = (props) => {
                 setter(res.data || []);
             } catch (error) {
                 console.error(`Error al cargar ${url}:`, error);
-                // NO resetea — deja el valor anterior intacto
             }
         };
 
@@ -63,18 +65,20 @@ const UsuarioState = (props) => {
             cargar(LotesListar, setListaLotes),
             cargar(SalidaListar, setListaSalida),
             cargar(SucursalesListar, setListaSucursales),
+            cargar(UsuariosListar, setListaUsuarios),
         ]);
     };
-    // --- Actualizar lista individual ---
+
     const ActualizarLista = async (url, setDatos) => {
+        if (!token) return [];
         try {
-            const respuesta = await axios.get(url);
+            const config = { headers: { Authorization: `Bearer ${token}` } }; // ← agregar
+            const respuesta = await axios.get(url, config); // ← agregar config
             const data = respuesta.data || [];
             setDatos(data);
             return data;
         } catch (error) {
             console.error(`Error al actualizar la lista desde ${url}:`, error);
-            setDatos([]);
             return [];
         }
     };
@@ -82,34 +86,15 @@ const UsuarioState = (props) => {
     return (
         <UsuarioContext.Provider
             value={{
-                // Sesión
-                usuario,
-                token,
-                setLogin,
-                setCerrarSesion,
-
-                // Listas
-                listaProductos,
-                listaCategorias,
-                listaLotes,
-                listaSalida,
-                listaSucursales,
-                actualizar,
-
-                // Setters
-                setActualizar,
-                setListaProductos,
-                setListaCategorias,
-                setListaLotes,
-                setListaSalida,
-                setListaSucursales,
-
-                // Funciones
-                Lista,
-                ActualizarLista,
+                usuario, token, setLogin, setCerrarSesion,
+                listaProductos, listaCategorias, listaLotes,
+                listaSalida, listaSucursales, listaUsuarios, actualizar,
+                setActualizar, setListaProductos, setListaCategorias,
+                setListaLotes, setListaSalida, setListaSucursales,
+                setListaUsuarios, Lista, ActualizarLista,
             }}
         >
-            {props.children}
+            {hidratado ? props.children : null} {/* ← envolver con hidratado */}
         </UsuarioContext.Provider>
     );
 };

@@ -41,7 +41,6 @@ const Login = () => {
       navigate("/app/productos/inicio");
 
     } catch (error) {
-      console.error("Error completo:", error);
       if (error.response) {
         const { status, data } = error.response;
         if (status === 400 && Array.isArray(data)) {

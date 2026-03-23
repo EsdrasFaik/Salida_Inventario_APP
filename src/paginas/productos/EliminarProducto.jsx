@@ -38,7 +38,6 @@ const EliminarProducto = ({ datos, token, setListaProductos, ActualizarLista }) 
             mostraAlertaOk("Producto eliminado correctamente");
             ActualizarLista(ProductosListar, setListaProductos);
         } catch (error) {
-            console.error(error);
             const msjError = error.response?.data?.error || "Ocurrió un error desconocido al eliminar.";
             mostraAlertaError(msjError);
         } finally {

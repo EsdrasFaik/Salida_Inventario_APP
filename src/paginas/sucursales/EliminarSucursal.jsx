@@ -37,7 +37,6 @@ const EliminarSucursal = ({ datos, token, setListaSucursales, ActualizarLista })
             mostraAlertaOk("Sucursal eliminada correctamente");
             ActualizarLista(SucursalesListar, setListaSucursales);
         } catch (error) {
-            console.error(error);
             const msjError = error.response?.data?.error || "Ocurrió un error desconocido al eliminar.";
             mostraAlertaError(msjError);
         } finally {

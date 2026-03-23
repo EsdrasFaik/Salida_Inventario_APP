@@ -1,22 +1,28 @@
 import { useState, useMemo } from "react";
 import { useContextUsuario } from "../../contexto/usuario/UsuarioContext";
-import EliminarSucursal from "./EliminarSucursal";
 import SelectInput from "../../componentes/inputs/Select";
 import "../styles/styles.css";
+
+const opcionesTipo = [
+    { value: "Todos", label: "Todos los roles" },
+    { value: "Administrador", label: "Administrador" },
+    { value: "Jefe de bodega", label: "Jefe de bodega" },
+    { value: "Empleado", label: "Empleado" },
+];
 
 const opcionesEstado = [
     { value: "Activo", label: "Activos" },
     { value: "Inactivo", label: "Inactivos" },
-    { value: "Todos", label: "Todos" },
 ];
 
 const opcionesPorPagina = [5, 10, 25, 50].map(n => ({ value: n, label: `Mostrar ${n}` }));
 
-const TablaSucursal = ({ datos = [], onEditar }) => {
-    const { token, setListaSucursales, ActualizarLista } = useContextUsuario();
+const TablaUsuarios = ({ datos = [], onEditar }) => {
+    const { token, setListaUsuarios, ActualizarLista } = useContextUsuario();
 
     const [busqueda, setBusqueda] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("Activo");
+    const [filtroTipo, setFiltroTipo] = useState("Todos");
     const [pagina, setPagina] = useState(1);
     const [porPagina, setPorPagina] = useState(10);
     const [orden, setOrden] = useState({ col: "id", dir: "asc" });
@@ -34,12 +40,14 @@ const TablaSucursal = ({ datos = [], onEditar }) => {
     };
 
     const datosFiltrados = useMemo(() => {
-        let lista = datos.filter((s) => {
+        let lista = datos.filter((u) => {
             const coincideBusqueda =
-                s.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-                s.ubicacion?.toLowerCase().includes(busqueda.toLowerCase());
-            const coincideEstado = filtroEstado === "Todos" || s.estado === filtroEstado;
-            return coincideBusqueda && coincideEstado;
+                u.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
+                u.correo?.toLowerCase().includes(busqueda.toLowerCase()) ||
+                u.Sucursal?.nombre?.toLowerCase().includes(busqueda.toLowerCase());
+            const coincideEstado = filtroEstado === "Todos" || u.estado === filtroEstado;
+            const coincideTipo = filtroTipo === "Todos" || u.tipoUsuario === filtroTipo;
+            return coincideBusqueda && coincideEstado && coincideTipo;
         });
 
         lista = [...lista].sort((a, b) => {
@@ -53,7 +61,7 @@ const TablaSucursal = ({ datos = [], onEditar }) => {
         });
 
         return lista;
-    }, [datos, busqueda, filtroEstado, orden]);
+    }, [datos, busqueda, filtroEstado, filtroTipo, orden]);
 
     const totalPaginas = Math.ceil(datosFiltrados.length / porPagina);
     const datosPaginados = datosFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
@@ -61,6 +69,19 @@ const TablaSucursal = ({ datos = [], onEditar }) => {
     const cambiarPagina = (p) => {
         if (p < 1 || p > totalPaginas) return;
         setPagina(p);
+    };
+
+    const colorTipo = (tipo) => {
+        if (tipo === "Administrador") return "bg-danger";
+        if (tipo === "Jefe de bodega") return "bg-warning";
+        return "bg-info";
+    };
+
+    const colorEstado = (estado) => {
+        if (estado === "Activo") return "bg-success";
+        if (estado === "Bloqueado") return "bg-danger";
+        if (estado === "Logeado") return "bg-primary";
+        return "bg-secondary";
     };
 
     return (
@@ -71,11 +92,19 @@ const TablaSucursal = ({ datos = [], onEditar }) => {
                     <i className="fas fa-search" />
                     <input
                         type="text"
-                        placeholder="Buscar por nombre o ubicación..."
+                        placeholder="Buscar por nombre, correo o sucursal..."
                         value={busqueda}
                         onChange={(e) => { setBusqueda(e.target.value); setPagina(1); }}
                     />
                 </div>
+                <SelectInput
+                    options={opcionesTipo}
+                    value={filtroTipo}
+                    onChange={(v) => { setFiltroTipo(v || "Todos"); setPagina(1); }}
+                    placeholder="Todos los roles"
+                    isClearable={false}
+                    minWidth={160}
+                />
                 <SelectInput
                     options={opcionesEstado}
                     value={filtroEstado}
@@ -102,46 +131,48 @@ const TablaSucursal = ({ datos = [], onEditar }) => {
                             <th className="no-sort">Opciones</th>
                             <th onClick={() => toggleOrden("id")}>ID {iconOrden("id")}</th>
                             <th onClick={() => toggleOrden("nombre")}>Nombre {iconOrden("nombre")}</th>
-                            <th onClick={() => toggleOrden("ubicacion")}>Ubicación {iconOrden("ubicacion")}</th>
+                            <th onClick={() => toggleOrden("correo")}>Correo {iconOrden("correo")}</th>
+                            <th onClick={() => toggleOrden("tipoUsuario")}>Rol {iconOrden("tipoUsuario")}</th>
+                            <th>Sucursal</th>
                             <th onClick={() => toggleOrden("estado")}>Estado {iconOrden("estado")}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {datosPaginados.length === 0 ? (
                             <tr>
-                                <td colSpan={5}>
+                                <td colSpan={7}>
                                     <div className="tp-empty">
-                                        <i className="fas fa-store-slash" />
-                                        <span>No hay sucursales registradas</span>
+                                        <i className="fas fa-users-slash" />
+                                        <span>No hay usuarios registrados</span>
                                     </div>
                                 </td>
                             </tr>
                         ) : (
-                            datosPaginados.map((sucursal) => (
-                                <tr key={sucursal.id}>
+                            datosPaginados.map((usuario) => (
+                                <tr key={usuario.id}>
                                     <td>
                                         <div className="tp-actions">
                                             <button
                                                 className="tp-btn-editar"
-                                                onClick={() => onEditar(sucursal)}
-                                                title="Editar sucursal"
+                                                onClick={() => onEditar(usuario)}
+                                                title="Editar usuario"
                                             >
                                                 <i className="fas fa-edit" /> Editar
                                             </button>
-                                            <EliminarSucursal
-                                                datos={sucursal}
-                                                token={token}
-                                                setListaSucursales={setListaSucursales}
-                                                ActualizarLista={ActualizarLista}
-                                            />
                                         </div>
                                     </td>
-                                    <td>{sucursal.id}</td>
-                                    <td>{sucursal.nombre}</td>
-                                    <td>{sucursal.ubicacion}</td>
+                                    <td>{usuario.id}</td>
+                                    <td>{usuario.nombre}</td>
+                                    <td>{usuario.correo}</td>
                                     <td>
-                                        <span className={`tp-badge badge ${sucursal.estado === "Activo" ? "bg-success" : "bg-secondary"}`}>
-                                            {sucursal.estado}
+                                        <span className={`tp-badge badge ${colorTipo(usuario.tipoUsuario)}`}>
+                                            {usuario.tipoUsuario}
+                                        </span>
+                                    </td>
+                                    <td>{usuario.Sucursal?.nombre || <span className="text-muted">—</span>}</td>
+                                    <td>
+                                        <span className={`tp-badge badge ${colorEstado(usuario.estado)}`}>
+                                            {usuario.estado}
                                         </span>
                                     </td>
                                 </tr>
@@ -196,4 +227,4 @@ const TablaSucursal = ({ datos = [], onEditar }) => {
     );
 };
 
-export default TablaSucursal;
+export default TablaUsuarios;
