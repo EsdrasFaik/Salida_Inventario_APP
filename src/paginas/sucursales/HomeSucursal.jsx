@@ -14,8 +14,6 @@ const HomeSucursales = () => {
     const pageDatos = {
         titulo: {
             titulo: "Gestión de sucursales",
-            url: "/app/sucursales",
-            tituloUrl: "sucursales",
             nombreUrl: "inicio",
         },
     };

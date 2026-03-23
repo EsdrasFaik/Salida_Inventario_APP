@@ -39,8 +39,8 @@ const GuardarSucursal = () => {
     const pageDatos = {
         titulo: {
             titulo: esEdicion ? "Editar sucursal" : "Nueva sucursal",
-            url: "/app/admin/sucursales",
-            tituloUrl: "sucursales",
+            url: "/app/sucursales/inicio",
+            tituloUrl: "inicio",
             nombreUrl: esEdicion ? "editar" : "nuevo",
         },
     };
@@ -51,11 +51,22 @@ const GuardarSucursal = () => {
     }, [token]);
 
     useEffect(() => {
-        setErrorNombre(formulario.nombre.length > 0 && !regexNombre.test(formulario.nombre));
+        setErrorNombre(
+            formulario.nombre.length > 0 && (
+                !regexNombre.test(formulario.nombre) ||
+                formulario.nombre.length > 100
+            )
+        );
     }, [formulario.nombre]);
 
+
     useEffect(() => {
-        setErrorUbicacion(formulario.ubicacion.length > 0 && formulario.ubicacion.trim().length < 3);
+        setErrorUbicacion(
+            formulario.ubicacion.length > 0 && (
+                formulario.ubicacion.trim().length < 3 ||
+                formulario.ubicacion.length > 255
+            )
+        );
     }, [formulario.ubicacion]);
 
     // --- CARGAR SUCURSAL (solo edición) ---
@@ -86,8 +97,10 @@ const GuardarSucursal = () => {
 
     // --- VALIDAR ---
     const validar = () => {
-        const nombreErr = !regexNombre.test(formulario.nombre);
-        const ubicacionErr = !formulario.ubicacion.trim() || formulario.ubicacion.trim().length < 3;
+        const nombreErr = !regexNombre.test(formulario.nombre) || formulario.nombre.length > 100;
+        const ubicacionErr = !formulario.ubicacion.trim()
+            || formulario.ubicacion.trim().length < 3
+            || formulario.ubicacion.length > 255;
         setErrorNombre(nombreErr);
         setErrorUbicacion(ubicacionErr);
 
@@ -109,14 +122,17 @@ const GuardarSucursal = () => {
             if (esEdicion) {
                 await AxiosPrivado.put(SucursalesEditar + sucursalId, formulario, config);
                 mostraAlertaOk("Sucursal actualizada correctamente.");
-                navigate("/app/sucursales/listado");
+                navigate("/app/sucursales/inicio");
             } else {
                 await AxiosPrivado.post(SucursalesGuardar, formulario, config);
                 mostraAlertaOk("Sucursal guardada correctamente.");
                 limpiar();
             }
         } catch (error) {
-            mostraAlertaError(error.response?.data?.error || "Error al guardar la sucursal.");
+            const mensajeError = error.response?.data?.errors?.[0]?.msg
+                || error.response?.data?.error
+                || "Error al guardar la sucursal.";
+            mostraAlertaError(mensajeError);
         }
     };
 
@@ -135,7 +151,7 @@ const GuardarSucursal = () => {
                 {esEdicion ? "Actualizar" : "Guardar"}
             </button>
             {esEdicion ? (
-                <button type="button" className="btn btn-secondary" onClick={() => navigate("/app/sucursales/listado")}>
+                <button type="button" className="btn btn-secondary" onClick={() => navigate("/app/sucursales/inicio")}>
                     <i className="fas fa-times mx-1" /> Cancelar
                 </button>
             ) : (
@@ -179,7 +195,11 @@ const GuardarSucursal = () => {
                                             value={formulario.nombre}
                                             onChange={manejador}
                                         />
-                                        {errorNombre && <div className="invalid-feedback">Ingrese un nombre válido (mín. 3 caracteres).</div>}
+                                        {errorNombre && (
+                                            <div className="invalid-feedback">
+                                                Ingrese un nombre válido (mín. 3 y máx. 100 caracteres).
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="col-md-4 col-sm-12">
@@ -216,7 +236,11 @@ const GuardarSucursal = () => {
                                             value={formulario.ubicacion}
                                             onChange={manejador}
                                         />
-                                        {errorUbicacion && <div className="invalid-feedback">Ingrese una ubicación válida (mín. 3 caracteres).</div>}
+                                        {errorUbicacion && (
+                                            <div className="invalid-feedback">
+                                                Ingrese una ubicación válida (mín. 3 y máx. 255 caracteres).
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

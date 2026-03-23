@@ -1,9 +1,17 @@
-// --- IMPORTACIONES ---
 import { useState, useMemo } from "react";
 import { useContextUsuario } from "../../contexto/usuario/UsuarioContext";
 import EliminarProducto from "./EliminarProducto";
+import SelectInput from "../../componentes/inputs/Select";
 import { ImagenProductos } from "../../configuracion/apiUrls";
 import "../styles/styles.css";
+
+const opcionesEstado = [
+    { value: "Activo", label: "Activos" },
+    { value: "Inactivo", label: "Inactivos" },
+    { value: "Todos", label: "Todos" },
+];
+
+const opcionesPorPagina = [5, 10, 25, 50].map(n => ({ value: n, label: `Mostrar ${n}` }));
 
 const TablaProductos = ({ datos = [], onEditar }) => {
     const { token, setListaProductos, ActualizarLista } = useContextUsuario();
@@ -14,7 +22,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
     const [porPagina, setPorPagina] = useState(10);
     const [orden, setOrden] = useState({ col: "id", dir: "asc" });
 
-    // --- ORDENAR ---
     const toggleOrden = (col) => {
         setOrden((prev) => ({ col, dir: prev.col === col && prev.dir === "asc" ? "desc" : "asc" }));
         setPagina(1);
@@ -27,7 +34,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
             : <i className="fas fa-sort-down ms-1" style={{ color: "#3b82f6" }} />;
     };
 
-    // --- FILTRAR Y ORDENAR ---
     const datosFiltrados = useMemo(() => {
         let lista = datos.filter((p) => {
             const coincideBusqueda =
@@ -51,7 +57,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
         return lista;
     }, [datos, busqueda, filtroEstado, orden]);
 
-    // --- PAGINACIÓN ---
     const totalPaginas = Math.ceil(datosFiltrados.length / porPagina);
     const datosPaginados = datosFiltrados.slice((pagina - 1) * porPagina, pagina * porPagina);
 
@@ -62,7 +67,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
 
     return (
         <>
-
             {/* --- BARRA DE HERRAMIENTAS --- */}
             <div className="tp-toolbar">
                 <div className="tp-search">
@@ -74,14 +78,22 @@ const TablaProductos = ({ datos = [], onEditar }) => {
                         onChange={(e) => { setBusqueda(e.target.value); setPagina(1); }}
                     />
                 </div>
-                <select className="tp-select" value={filtroEstado} onChange={(e) => { setFiltroEstado(e.target.value); setPagina(1); }}>
-                    <option value="Activo">Activos</option>
-                    <option value="Inactivo">Inactivos</option>
-                    <option value="Todos">Todos</option>
-                </select>
-                <select className="tp-select" value={porPagina} onChange={(e) => { setPorPagina(Number(e.target.value)); setPagina(1); }}>
-                    {[5, 10, 25, 50].map((n) => <option key={n} value={n}>Mostrar {n}</option>)}
-                </select>
+                <SelectInput
+                    options={opcionesEstado}
+                    value={filtroEstado}
+                    onChange={(v) => { setFiltroEstado(v || "Activo"); setPagina(1); }}
+                    placeholder="Estado..."
+                    isClearable={false}
+                    minWidth={130}
+                />
+                <SelectInput
+                    options={opcionesPorPagina}
+                    value={porPagina}
+                    onChange={(v) => { setPorPagina(Number(v)); setPagina(1); }}
+                    placeholder="Mostrar..."
+                    isClearable={false}
+                    minWidth={130}
+                />
             </div>
 
             {/* --- TABLA --- */}
@@ -116,7 +128,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
 
                                 return (
                                     <tr key={producto.id}>
-                                        {/* --- ACCIONES --- */}
                                         <td>
                                             <div className="tp-actions">
                                                 <button
@@ -143,7 +154,7 @@ const TablaProductos = ({ datos = [], onEditar }) => {
                                                 className="tp-img"
                                                 src={imagenUrl}
                                                 alt={producto.nombre}
-                                                onError={(e) => { e.target.src = ImagenProductos + "producto_default.jpeg"; }}
+                                                onError={(e) => { e.target.onerror = null; e.target.src = "/producto_default.jpeg"; }}
                                             />
                                         </td>
                                         <td>
@@ -172,7 +183,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
                     <button className="tp-page-btn" onClick={() => cambiarPagina(pagina - 1)} disabled={pagina === 1}>
                         <i className="fas fa-angle-left" />
                     </button>
-
                     {Array.from({ length: totalPaginas }, (_, i) => i + 1)
                         .filter((p) => p === 1 || p === totalPaginas || Math.abs(p - pagina) <= 1)
                         .reduce((acc, p, idx, arr) => {
@@ -193,7 +203,6 @@ const TablaProductos = ({ datos = [], onEditar }) => {
                                 </button>
                             )
                         )}
-
                     <button className="tp-page-btn" onClick={() => cambiarPagina(pagina + 1)} disabled={pagina === totalPaginas || totalPaginas === 0}>
                         <i className="fas fa-angle-right" />
                     </button>

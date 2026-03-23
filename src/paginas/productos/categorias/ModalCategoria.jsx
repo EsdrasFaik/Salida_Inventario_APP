@@ -25,6 +25,7 @@ export const ModalFormularioCategoria = ({ isOpen, setIsOpen, datos, onGuardado,
     const [estado, setEstado] = useState("Activo");
     const [imagen, setImagen] = useState(null);
     const [errorNombre, setErrorNombre] = useState(false);
+    const [errorDescripcion, setErrorDescripcion] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -37,10 +38,11 @@ export const ModalFormularioCategoria = ({ isOpen, setIsOpen, datos, onGuardado,
 
     useEffect(() => {
         setErrorNombre(nombre.length > 0 && !regexNombre.test(nombre));
-    }, [nombre]);
+        setErrorDescripcion(descripcion.length > 50);
+    }, [nombre, descripcion]);
 
     const handleGuardar = async () => {
-        if (!nombre || errorNombre)
+        if (!nombre || errorNombre || errorDescripcion)
             return mostraAlertaWarning("Por favor, corrige los errores en el formulario.");
 
         const formData = new FormData();
@@ -62,7 +64,10 @@ export const ModalFormularioCategoria = ({ isOpen, setIsOpen, datos, onGuardado,
             setIsOpen(false);
             onGuardado();
         } catch (error) {
-            mostraAlertaError(error.response?.data?.error || "Error en la petición");
+            const mensajeError = error.response?.data?.errors?.[0]?.msg
+                || error.response?.data?.error
+                || "Error en la petición";
+            mostraAlertaError(mensajeError);
         }
     };
 
@@ -100,12 +105,18 @@ export const ModalFormularioCategoria = ({ isOpen, setIsOpen, datos, onGuardado,
                     <div>
                         <div className="mcf-label">Descripción</div>
                         <textarea
-                            className="form-control"
+                            className={`form-control ${errorDescripcion ? "is-invalid" : ""}`}
                             placeholder="Descripción de la categoría..."
                             rows={3}
                             value={descripcion}
                             onChange={(e) => setDescripcion(e.target.value)}
                         />
+                        {errorDescripcion && (
+                            <div className="invalid-feedback">La descripción no puede superar 50 caracteres.</div>
+                        )}
+                        <small className={`text-end d-block mt-1 ${descripcion.length > 50 ? "text-danger" : "text-muted"}`}>
+                            {descripcion.length}/50
+                        </small>
                     </div>
 
                     {esEdicion && datos?.imagen && (

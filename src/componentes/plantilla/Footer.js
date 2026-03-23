@@ -23,9 +23,9 @@ const Footer = () => {
         <div className="row">
           {/* Información Principal */}
           <div className="col-md-4 mb-3">
-            <h5 className="fw-bold text-white">APP TEST</h5>
+            <h5 className="fw-bold text-white">FARSIMAN</h5>
             <p className="text-white">
-             APP DE PRUEBA
+              Prueba de salida de inventario
             </p>
           </div>
 
@@ -50,7 +50,7 @@ const Footer = () => {
         {/* Derechos Reservados */}
         <div className="text-center mt-3">
           <p className="text-white mb-0">
-            &copy; APP TEST.
+            &copy; FARSIMAN.
           </p>
         </div>
       </div>

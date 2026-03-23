@@ -2,8 +2,7 @@ import { Navigate, useOutlet } from "react-router-dom";
 import { mostraAlertaError } from "../componentes/alerts/sweetAlert";
 import { useContextUsuario } from "../contexto/usuario/UsuarioContext";
 
-
-const SucuralLayout = () => {
+export const UsuarioLayout = () => {
     const outlet = useOutlet();
     const { usuario } = useContextUsuario();
 
@@ -14,5 +13,3 @@ const SucuralLayout = () => {
 
     return outlet;
 };
-
-export default SucuralLayout;

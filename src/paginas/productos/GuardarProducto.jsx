@@ -53,12 +53,13 @@ const GuardarProducto = () => {
 
     const [errorNombre, setErrorNombre] = useState(false);
     const [errorCategoria, setErrorCategoria] = useState(false);
+    const [errorSku, setErrorSku] = useState(false);
 
     const pageDatos = {
         titulo: {
             titulo: esEdicion ? "Editar producto" : "Nuevo producto",
-            url: "/app/admin/productos",
-            tituloUrl: "productos",
+            url: "/app/productos/inicio",
+            tituloUrl: "inicio",
             nombreUrl: esEdicion ? "editar" : "nuevo",
         },
     };
@@ -76,7 +77,8 @@ const GuardarProducto = () => {
 
     useEffect(() => {
         setErrorNombre(formulario.nombre.length > 0 && !regexNombre.test(formulario.nombre));
-    }, [formulario.nombre]);
+        setErrorSku(formulario.sku.length > 0 && formulario.sku.trim().length < 1);
+    }, [formulario.nombre, formulario.sku]);
 
     useEffect(() => {
         setErrorCategoria(!formulario.categoriaId);
@@ -138,15 +140,18 @@ const GuardarProducto = () => {
     const validar = () => {
         const nombreErr = !regexNombre.test(formulario.nombre);
         const categoriaErr = !formulario.categoriaId;
+        const skuErr = formulario.sku.trim().length === 0;
         setErrorNombre(nombreErr);
         setErrorCategoria(categoriaErr);
+        setErrorSku(skuErr);
 
-        if (nombreErr || categoriaErr) {
+        if (nombreErr || categoriaErr || skuErr) {
             mostraAlertaError("Existen errores en el formulario. Por favor corrígelos.");
             return false;
         }
         if (!formulario.nombre.trim()) { mostraAlertaWarning("El nombre es obligatorio."); return false; }
         if (!formulario.categoriaId) { mostraAlertaWarning("Debe seleccionar una categoría."); return false; }
+        if (skuErr) { mostraAlertaError("El SKU es obligatorio."); return false; }
         if (!esEdicion && nuevasImagenes.length === 0) {
             mostraAlertaWarning("Debe adjuntar al menos una imagen del producto.");
             return false;
@@ -178,14 +183,17 @@ const GuardarProducto = () => {
             if (esEdicion) {
                 await AxiosImagen.put(ProductosEditar + productoId, formData);
                 mostraAlertaOk("Producto actualizado correctamente.");
-                navigate("/app/productos/listado");
+                navigate("/app/productos/inicio");
             } else {
                 await AxiosImagen.post(ProductosGuardar, formData);
                 mostraAlertaOk("Producto guardado correctamente.");
                 limpiar();
             }
         } catch (error) {
-            mostraAlertaError(error.response?.data?.error || "Error al guardar el producto.");
+            const mensajeError = error.response?.data?.errors?.[0]?.msg
+                || error.response?.data?.error
+                || "Error al guardar el producto.";
+            mostraAlertaError(mensajeError);
         }
     };
 
@@ -209,7 +217,7 @@ const GuardarProducto = () => {
                 {esEdicion ? "Actualizar" : "Guardar"}
             </button>
             {esEdicion ? (
-                <button type="button" className="btn btn-secondary" onClick={() => navigate("/app/productos/listado")}>
+                <button type="button" className="btn btn-secondary" onClick={() => navigate("/app/productos/inicio")}>
                     <i className="fas fa-times mx-1" /> Cancelar
                 </button>
             ) : (
@@ -263,11 +271,12 @@ const GuardarProducto = () => {
                                             type="text"
                                             id="sku"
                                             name="sku"
-                                            className="form-control"
+                                            className={`form-control ${errorSku ? "is-invalid" : ""}`}
                                             placeholder="Ej: AMX-500"
                                             value={formulario.sku}
                                             onChange={manejador}
                                         />
+                                        {errorSku && <div className="invalid-feedback">El SKU es obligatorio.</div>}
                                     </div>
                                 </div>
                             </div>

@@ -6,7 +6,8 @@ import {
     CategoriaListar,
     LotesListar,
     SalidaListar,
-    SucursalesListar
+    SucursalesListar,
+    UsuariosListar,
 } from "../../configuracion/apiUrls";
 import { UsuarioContext } from "./UsuarioContext";
 
@@ -21,11 +22,12 @@ const UsuarioState = (props) => {
     const [listaLotes, setListaLotes] = useState([]);
     const [listaSalida, setListaSalida] = useState([]);
     const [listaSucursales, setListaSucursales] = useState([]);
+    const [listaUsuarios, setListaUsuarios] = useState([]);
     const [actualizar, setActualizar] = useState(false);
 
     useEffect(() => {
-        Lista();
-    }, []);
+        if (token) Lista();
+    }, [token]);
 
     // --- Autenticación ---
     const setCerrarSesion = () => {
@@ -53,7 +55,6 @@ const UsuarioState = (props) => {
                 setter(res.data || []);
             } catch (error) {
                 console.error(`Error al cargar ${url}:`, error);
-                // NO resetea — deja el valor anterior intacto
             }
         };
 
@@ -63,10 +64,12 @@ const UsuarioState = (props) => {
             cargar(LotesListar, setListaLotes),
             cargar(SalidaListar, setListaSalida),
             cargar(SucursalesListar, setListaSucursales),
+            cargar(UsuariosListar, setListaUsuarios),
         ]);
     };
-    // --- Actualizar lista individual ---
+
     const ActualizarLista = async (url, setDatos) => {
+        if (!token) return [];
         try {
             const respuesta = await axios.get(url);
             const data = respuesta.data || [];
@@ -94,6 +97,7 @@ const UsuarioState = (props) => {
                 listaLotes,
                 listaSalida,
                 listaSucursales,
+                listaUsuarios,
                 actualizar,
 
                 // Setters
@@ -103,6 +107,7 @@ const UsuarioState = (props) => {
                 setListaLotes,
                 setListaSalida,
                 setListaSucursales,
+                setListaUsuarios,
 
                 // Funciones
                 Lista,
